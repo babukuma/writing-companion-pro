@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        screenplay: ['"Courier Prime"', '"Courier New"', 'monospace'],
+        sans: ["Inter", "system-ui", "sans-serif"],
+        screenplay: ["Courier Prime", "Courier New", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -95,3 +95,6 @@ export default {
         "fade-up": "fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards",
       },
     },
+  },
+  plugins: [require("tailwindcss-animate")],
+} satisfies Config;
