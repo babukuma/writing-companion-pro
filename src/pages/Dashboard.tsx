@@ -2,29 +2,33 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getScripts, createScript, deleteScript, setLoggedIn } from '@/lib/storage';
 import { Script } from '@/lib/types';
-import { Plus, LogOut, Trash2 } from 'lucide-react';
+import { Plus, LogOut, Trash2, X } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [scripts, setScripts] = useState<Script[]>([]);
+  const [showNewDialog, setShowNewDialog] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     setScripts(getScripts());
   }, []);
 
-  const handleNew = () => {
-    const title = prompt('Project name:');
-    if (!title?.trim()) return;
-    const script = createScript(title.trim());
+  const handleCreate = () => {
+    if (!newTitle.trim()) return;
+    const script = createScript(newTitle.trim());
+    setShowNewDialog(false);
+    setNewTitle('');
     navigate(`/editor/${script.id}`);
   };
 
-  const handleDelete = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    if (!confirm('Delete this script?')) return;
-    deleteScript(id);
+  const handleDelete = () => {
+    if (!deleteId) return;
+    deleteScript(deleteId);
     setScripts(getScripts());
+    setDeleteId(null);
   };
 
   const handleLogout = () => {
@@ -50,7 +54,7 @@ export default function Dashboard() {
             <p className="text-sm text-muted-foreground mt-0.5">Unlimited projects</p>
           </div>
           <button
-            onClick={handleNew}
+            onClick={() => setShowNewDialog(true)}
             className="flex items-center gap-2 bg-primary text-primary-foreground font-semibold px-4 py-2.5 rounded-lg active:scale-95 transition-transform shadow-sm"
           >
             <Plus className="w-4 h-4" />
@@ -65,12 +69,11 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="space-y-3">
-            {scripts.map((s, i) => (
+            {scripts.map((s) => (
               <div
                 key={s.id}
                 onClick={() => navigate(`/editor/${s.id}`)}
                 className="bg-card rounded-xl px-5 py-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98] group"
-                style={{ animationDelay: `${i * 60}ms` }}
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -81,7 +84,7 @@ export default function Dashboard() {
                     <p className="text-sm text-muted-foreground">{countPages(s)} page{countPages(s) !== 1 ? 's' : ''}</p>
                   </div>
                   <button
-                    onClick={(e) => handleDelete(e, s.id)}
+                    onClick={(e) => { e.stopPropagation(); setDeleteId(s.id); }}
                     className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all p-1"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -92,6 +95,49 @@ export default function Dashboard() {
           </div>
         )}
       </main>
+
+      {/* New Project Dialog */}
+      {showNewDialog && (
+        <div className="fixed inset-0 bg-foreground/30 flex items-center justify-center z-50 px-6" onClick={() => setShowNewDialog(false)}>
+          <div className="bg-card rounded-2xl p-6 w-full max-w-sm shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold">New Project</h3>
+              <button onClick={() => setShowNewDialog(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <input
+              autoFocus
+              value={newTitle}
+              onChange={e => setNewTitle(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleCreate()}
+              placeholder="Project name"
+              className="w-full border rounded-lg px-4 py-3 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <button
+              onClick={handleCreate}
+              disabled={!newTitle.trim()}
+              className="w-full mt-4 bg-primary text-primary-foreground font-semibold py-3 rounded-lg disabled:opacity-40 active:scale-95 transition-all"
+            >
+              Create
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirm Dialog */}
+      {deleteId && (
+        <div className="fixed inset-0 bg-foreground/30 flex items-center justify-center z-50 px-6" onClick={() => setDeleteId(null)}>
+          <div className="bg-card rounded-2xl p-6 w-full max-w-sm shadow-xl" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-2">Delete Script?</h3>
+            <p className="text-sm text-muted-foreground mb-6">This action cannot be undone.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteId(null)} className="flex-1 border rounded-lg py-2.5 font-medium active:scale-95 transition-all">Cancel</button>
+              <button onClick={handleDelete} className="flex-1 bg-destructive text-destructive-foreground rounded-lg py-2.5 font-medium active:scale-95 transition-all">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
