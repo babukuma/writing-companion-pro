@@ -224,7 +224,7 @@ export default function Editor() {
 
       {/* Editor Area */}
       <div className="flex-1 overflow-auto">
-        <div className="max-w-3xl mx-auto bg-editor-bg min-h-full rounded-lg my-4 mx-3 p-6 shadow-sm screenplay-font text-sm leading-relaxed relative">
+        <div className="max-w-3xl mx-auto bg-editor-bg min-h-full rounded-lg my-4 mx-3 p-6 shadow-sm font-screenplay text-sm leading-relaxed relative">
           {script.elements.map(el => (
             <div key={el.id} className="relative mb-1">
               <textarea
