@@ -255,48 +255,89 @@ export default function Editor() {
       {/* Editor Area */}
       <div className="flex-1 overflow-auto">
         <div className="max-w-3xl mx-auto bg-editor-bg min-h-full rounded-lg my-4 mx-3 p-6 shadow-sm font-screenplay text-sm leading-relaxed relative">
-          {script.elements.map(el => (
-            <div key={el.id} className="relative mb-1">
-              <textarea
-                ref={(node) => { if (node) inputRefs.current.set(el.id, node); }}
-                value={el.content}
-                onChange={(e) => updateElement(el.id, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e, el)}
-                onFocus={() => {
-                  setActiveType(el.type);
-                  if (el.content === '' && el.type === 'scene-heading') {
-                    setShowDropdown({ elementId: el.id, options: SCENE_HEADING_OPTIONS });
-                  } else if (el.content === '' && el.type === 'transition') {
-                    setShowDropdown({ elementId: el.id, options: TRANSITION_OPTIONS });
-                  } else {
-                    setShowDropdown(null);
-                  }
-                }}
-                placeholder={getPlaceholder(el.type)}
-                className={`w-full bg-transparent resize-none outline-none placeholder:text-muted-foreground/40 ${getElementStyle(el.type)}`}
-                rows={1}
-                style={{ minHeight: '1.5em' }}
-                onInput={(e) => {
-                  const target = e.target as HTMLTextAreaElement;
-                  target.style.height = 'auto';
-                  target.style.height = target.scrollHeight + 'px';
-                }}
-              />
-              {showDropdown?.elementId === el.id && (
-                <div className="absolute left-0 top-full z-10 bg-card border rounded-lg shadow-lg py-1 min-w-[140px]">
-                  {showDropdown.options.map(opt => (
-                    <button
-                      key={opt}
-                      onClick={() => handleDropdownSelect(el.id, opt)}
-                      className="w-full text-left px-4 py-2 text-sm font-screenplay hover:bg-accent transition-colors"
-                    >
-                      {opt}
-                    </button>
-                  ))}
+          {(() => {
+            let lineCount = 0;
+            let currentPage = 1;
+            const LINES_PER_PAGE = 56;
+            const rendered: React.ReactNode[] = [];
+
+            script.elements.forEach((el, idx) => {
+              const contentLines = el.content ? Math.max(1, Math.ceil(el.content.length / 60)) : 1;
+              const spacing = el.type === 'scene-heading' ? 2 : 1;
+              const elLines = contentLines + spacing;
+
+              // Check if this element crosses a page boundary
+              if (lineCount + elLines > LINES_PER_PAGE && lineCount > 0) {
+                rendered.push(
+                  <div key={`page-break-${currentPage}`} className="my-6">
+                    <div className="h-[3px] bg-foreground/80 rounded-full" />
+                    <div className="text-right pr-2 pt-2 pb-4">
+                      <span className="font-screenplay text-sm text-foreground">{currentPage}.</span>
+                    </div>
+                  </div>
+                );
+                currentPage++;
+                lineCount = 0;
+              }
+
+              lineCount += elLines;
+
+              rendered.push(
+                <div key={el.id} className="relative mb-1">
+                  <textarea
+                    ref={(node) => { if (node) inputRefs.current.set(el.id, node); }}
+                    value={el.content}
+                    onChange={(e) => updateElement(el.id, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, el)}
+                    onFocus={() => {
+                      setActiveType(el.type);
+                      if (el.content === '' && el.type === 'scene-heading') {
+                        setShowDropdown({ elementId: el.id, options: SCENE_HEADING_OPTIONS });
+                      } else if (el.content === '' && el.type === 'transition') {
+                        setShowDropdown({ elementId: el.id, options: TRANSITION_OPTIONS });
+                      } else {
+                        setShowDropdown(null);
+                      }
+                    }}
+                    placeholder={getPlaceholder(el.type)}
+                    className={`w-full bg-transparent resize-none outline-none placeholder:text-muted-foreground/40 ${getElementStyle(el.type)}`}
+                    rows={1}
+                    style={{ minHeight: '1.5em' }}
+                    onInput={(e) => {
+                      const target = e.target as HTMLTextAreaElement;
+                      target.style.height = 'auto';
+                      target.style.height = target.scrollHeight + 'px';
+                    }}
+                  />
+                  {showDropdown?.elementId === el.id && (
+                    <div className="absolute left-0 top-full z-10 bg-card border rounded-lg shadow-lg py-1 min-w-[140px]">
+                      {showDropdown.options.map(opt => (
+                        <button
+                          key={opt}
+                          onClick={() => handleDropdownSelect(el.id, opt)}
+                          className="w-full text-left px-4 py-2 text-sm font-screenplay hover:bg-accent transition-colors"
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
+              );
+            });
+
+            // Final page number
+            rendered.push(
+              <div key={`page-break-final`} className="my-6">
+                <div className="h-[3px] bg-foreground/80 rounded-full" />
+                <div className="text-right pr-2 pt-2">
+                  <span className="font-screenplay text-sm text-foreground">{currentPage}.</span>
+                </div>
+              </div>
+            );
+
+            return rendered;
+          })()}
         </div>
       </div>
 
