@@ -355,6 +355,18 @@ export default function Editor() {
       >
         {isListening ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
       </button>
+
+      {/* AI Writing Assistant */}
+      <AIPromptDialog
+        open={showAI}
+        onClose={() => setShowAI(false)}
+        onGenerated={(elements) => {
+          if (!script) return;
+          const updated = { ...script, elements: [...script.elements, ...elements] };
+          setScript(updated);
+          autoSave(updated);
+        }}
+      />
     </div>
   );
 }
