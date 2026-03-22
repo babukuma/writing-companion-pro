@@ -248,9 +248,12 @@ export default function Editor() {
             );
           })}
         </div>
-        <button className="flex flex-col items-center justify-center px-3 py-2 border-l border-border/30 text-toolbar-foreground/70 hover:text-toolbar-foreground transition-colors whitespace-nowrap">
-          <Wrench className="w-5 h-5" />
-          <span className="text-[10px] mt-0.5 font-medium leading-tight text-center">Go to<br/>Tools</span>
+        <button
+          onClick={() => setShowAI(true)}
+          className="flex flex-col items-center justify-center px-3 py-2 border-l border-border/30 text-primary hover:text-primary/80 transition-colors whitespace-nowrap"
+        >
+          <Sparkles className="w-5 h-5" />
+          <span className="text-[10px] mt-0.5 font-medium leading-tight text-center">AI<br/>Write</span>
         </button>
       </div>
 
