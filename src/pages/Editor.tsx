@@ -181,7 +181,13 @@ export default function Editor() {
     return ELEMENT_LABELS[type].full.toUpperCase();
   };
 
-  const pageCount = script ? Math.max(1, Math.ceil(script.elements.length / 56)) : 1;
+  const pageCount = script ? Math.max(1, Math.ceil(
+    script.elements.reduce((lines, el) => {
+      const contentLines = el.content ? Math.max(1, Math.ceil(el.content.length / 60)) : 1;
+      const spacing = el.type === 'scene-heading' ? 2 : 1;
+      return lines + contentLines + spacing;
+    }, 0) / 56
+  )) : 1;
 
   if (!script) return null;
 
