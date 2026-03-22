@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getScript, saveScript } from '@/lib/storage';
 import { Script, ScriptElement, ScriptElementType, ELEMENT_LABELS, SCENE_HEADING_OPTIONS, TRANSITION_OPTIONS } from '@/lib/types';
-import { ArrowLeft, Save, Mic, MicOff, Menu, Image, Clapperboard, Users, MessageCircle, ArrowRightLeft, Video, Type, AlertCircle, List, Wrench } from 'lucide-react';
+import { ArrowLeft, Save, Mic, MicOff, Menu, Image, Clapperboard, Users, MessageCircle, ArrowRightLeft, Video, Type, AlertCircle, List, Wrench, Sparkles } from 'lucide-react';
+import AIPromptDialog from '@/components/AIPromptDialog';
 
 const ELEMENT_TYPES: ScriptElementType[] = [
   'scene-heading', 'action', 'character', 'parenthetical',
@@ -17,6 +18,7 @@ export default function Editor() {
   const [saved, setSaved] = useState(true);
   const [showDropdown, setShowDropdown] = useState<{ elementId: string; options: string[] } | null>(null);
   const [isListening, setIsListening] = useState(false);
+  const [showAI, setShowAI] = useState(false);
   const recognitionRef = useRef<any>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const inputRefs = useRef<Map<string, HTMLTextAreaElement>>(new Map());
@@ -246,9 +248,12 @@ export default function Editor() {
             );
           })}
         </div>
-        <button className="flex flex-col items-center justify-center px-3 py-2 border-l border-border/30 text-toolbar-foreground/70 hover:text-toolbar-foreground transition-colors whitespace-nowrap">
-          <Wrench className="w-5 h-5" />
-          <span className="text-[10px] mt-0.5 font-medium leading-tight text-center">Go to<br/>Tools</span>
+        <button
+          onClick={() => setShowAI(true)}
+          className="flex flex-col items-center justify-center px-3 py-2 border-l border-border/30 text-primary hover:text-primary/80 transition-colors whitespace-nowrap"
+        >
+          <Sparkles className="w-5 h-5" />
+          <span className="text-[10px] mt-0.5 font-medium leading-tight text-center">AI<br/>Write</span>
         </button>
       </div>
 
@@ -350,6 +355,18 @@ export default function Editor() {
       >
         {isListening ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
       </button>
+
+      {/* AI Writing Assistant */}
+      <AIPromptDialog
+        open={showAI}
+        onClose={() => setShowAI(false)}
+        onGenerated={(elements) => {
+          if (!script) return;
+          const updated = { ...script, elements: [...script.elements, ...elements] };
+          setScript(updated);
+          autoSave(updated);
+        }}
+      />
     </div>
   );
 }
