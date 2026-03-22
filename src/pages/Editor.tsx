@@ -212,20 +212,44 @@ export default function Editor() {
       </header>
 
       {/* Toolbar */}
-      <div className="flex items-center gap-0.5 px-2 py-1.5 bg-toolbar-bg overflow-x-auto shrink-0">
-        {ELEMENT_TYPES.map(type => (
-          <button
-            key={type}
-            onClick={() => handleTypeClick(type)}
-            className={`px-2.5 py-1.5 rounded text-xs font-semibold whitespace-nowrap transition-colors ${
-              activeType === type
-                ? 'bg-toolbar-active text-primary-foreground'
-                : 'text-toolbar-foreground/70 hover:text-toolbar-foreground'
-            }`}
-          >
-            {ELEMENT_LABELS[type].short}
-          </button>
-        ))}
+      <div className="flex items-center bg-toolbar-bg border-b shrink-0">
+        <button className="flex flex-col items-center justify-center px-3 py-2 border-r border-border/30 text-toolbar-foreground/70 hover:text-toolbar-foreground transition-colors">
+          <Menu className="w-5 h-5" />
+        </button>
+        <div className="flex items-center overflow-x-auto flex-1">
+          {ELEMENT_TYPES.map(type => {
+            const icons: Record<ScriptElementType, React.ReactNode> = {
+              'scene-heading': <Image className="w-5 h-5" />,
+              'action': <Clapperboard className="w-5 h-5" />,
+              'character': <Users className="w-5 h-5" />,
+              'parenthetical': <span className="text-lg font-bold leading-none">()</span>,
+              'dialogue': <MessageCircle className="w-5 h-5" />,
+              'transition': <ArrowRightLeft className="w-5 h-5" />,
+              'shot': <Video className="w-5 h-5" />,
+              'text': <Type className="w-5 h-5" />,
+              'note': <AlertCircle className="w-5 h-5" />,
+              'outline': <List className="w-5 h-5" />,
+            };
+            return (
+              <button
+                key={type}
+                onClick={() => handleTypeClick(type)}
+                className={`flex flex-col items-center justify-center px-3 py-2 min-w-[60px] transition-colors ${
+                  activeType === type
+                    ? 'bg-toolbar-active text-primary-foreground'
+                    : 'text-toolbar-foreground/70 hover:text-toolbar-foreground'
+                }`}
+              >
+                {icons[type]}
+                <span className="text-[10px] mt-0.5 font-medium leading-tight">{ELEMENT_LABELS[type].full.replace(' Heading', '').replace('hetical', 's')}</span>
+              </button>
+            );
+          })}
+        </div>
+        <button className="flex flex-col items-center justify-center px-3 py-2 border-l border-border/30 text-toolbar-foreground/70 hover:text-toolbar-foreground transition-colors whitespace-nowrap">
+          <Wrench className="w-5 h-5" />
+          <span className="text-[10px] mt-0.5 font-medium leading-tight text-center">Go to<br/>Tools</span>
+        </button>
       </div>
 
       {/* Editor Area */}
