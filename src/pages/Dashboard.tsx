@@ -36,7 +36,13 @@ export default function Dashboard() {
     navigate('/');
   };
 
-  const countPages = (s: Script) => Math.max(1, Math.ceil(s.elements.length / 56));
+  const countPages = (s: Script) => Math.max(1, Math.ceil(
+    s.elements.reduce((lines, el) => {
+      const contentLines = el.content ? Math.max(1, Math.ceil(el.content.length / 60)) : 1;
+      const spacing = el.type === 'scene-heading' ? 2 : 1;
+      return lines + contentLines + spacing;
+    }, 0) / 56
+  ));
 
   return (
     <div className="min-h-screen bg-background">
