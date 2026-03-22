@@ -18,6 +18,7 @@ export default function Editor() {
   const [saved, setSaved] = useState(true);
   const [showDropdown, setShowDropdown] = useState<{ elementId: string; options: string[] } | null>(null);
   const [isListening, setIsListening] = useState(false);
+  const [showAI, setShowAI] = useState(false);
   const recognitionRef = useRef<any>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const inputRefs = useRef<Map<string, HTMLTextAreaElement>>(new Map());
