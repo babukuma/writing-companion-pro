@@ -207,6 +207,9 @@ export default function Editor() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <span className="font-bold text-sm truncate max-w-[120px]">{script.title}</span>
+          <button onClick={() => setShowSettings(true)} className="p-1.5 hover:bg-accent rounded-lg active:scale-95 transition-all">
+            <Settings className="w-4 h-4 text-muted-foreground" />
+          </button>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span>{saved ? '☁ Saved' : 'Saving...'}</span>
