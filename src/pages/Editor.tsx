@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getScript, saveScript } from '@/lib/storage';
 import { Script, ScriptElement, ScriptElementType, ELEMENT_LABELS, SCENE_HEADING_OPTIONS, TRANSITION_OPTIONS } from '@/lib/types';
-import { ArrowLeft, Save, Mic, MicOff, Menu, Image, Clapperboard, Users, MessageCircle, ArrowRightLeft, Video, Type, AlertCircle, List, Wrench, Sparkles, Download } from 'lucide-react';
+import { ArrowLeft, Save, Mic, MicOff, Menu, Image, Clapperboard, Users, MessageCircle, ArrowRightLeft, Video, Type, AlertCircle, List, Wrench, Sparkles, Download, FileText } from 'lucide-react';
 import { exportScreenplayPdf } from '@/lib/exportPdf';
+import { exportScreenplayFdx } from '@/lib/exportFdx';
 import AIPromptDialog from '@/components/AIPromptDialog';
 
 const ELEMENT_TYPES: ScriptElementType[] = [
@@ -214,6 +215,10 @@ export default function Editor() {
           <button onClick={() => exportScreenplayPdf(script)} className="flex items-center gap-1 bg-primary text-primary-foreground rounded-lg px-3 py-1.5 font-medium hover:bg-primary/90 active:scale-95 transition-all">
             <Download className="w-3.5 h-3.5" />
             PDF
+          </button>
+          <button onClick={() => exportScreenplayFdx(script)} className="flex items-center gap-1 bg-card border rounded-lg px-3 py-1.5 font-medium hover:bg-accent active:scale-95 transition-all">
+            <FileText className="w-3.5 h-3.5" />
+            FDX
           </button>
         </div>
       </header>
