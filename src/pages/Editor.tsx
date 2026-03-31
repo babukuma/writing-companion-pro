@@ -213,14 +213,25 @@ export default function Editor() {
             <Save className="w-3.5 h-3.5" />
             Save
           </button>
-          <button onClick={() => exportScreenplayPdf(script)} className="flex items-center gap-1 bg-primary text-primary-foreground rounded-lg px-3 py-1.5 font-medium hover:bg-primary/90 active:scale-95 transition-all">
-            <Download className="w-3.5 h-3.5" />
-            PDF
-          </button>
-          <button onClick={() => exportScreenplayFdx(script)} className="flex items-center gap-1 bg-card border rounded-lg px-3 py-1.5 font-medium hover:bg-accent active:scale-95 transition-all">
-            <FileText className="w-3.5 h-3.5" />
-            FDX
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-1 bg-primary text-primary-foreground rounded-lg px-3 py-1.5 font-medium hover:bg-primary/90 active:scale-95 transition-all">
+                <Download className="w-3.5 h-3.5" />
+                Export
+                <ChevronDown className="w-3 h-3" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => exportScreenplayPdf(script)}>
+                <Download className="w-4 h-4 mr-2" />
+                Export as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportScreenplayFdx(script)}>
+                <FileText className="w-4 h-4 mr-2" />
+                Export as FDX (Final Draft)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
