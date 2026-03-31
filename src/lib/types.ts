@@ -19,6 +19,8 @@ export interface ScriptElement {
 export interface Script {
   id: string;
   title: string;
+  authorName?: string;
+  contactInfo?: string;
   createdAt: string;
   updatedAt: string;
   elements: ScriptElement[];

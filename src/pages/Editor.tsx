@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getScript, saveScript } from '@/lib/storage';
 import { Script, ScriptElement, ScriptElementType, ELEMENT_LABELS, SCENE_HEADING_OPTIONS, TRANSITION_OPTIONS } from '@/lib/types';
-import { ArrowLeft, Save, Mic, MicOff, Menu, Image, Clapperboard, Users, MessageCircle, ArrowRightLeft, Video, Type, AlertCircle, List, Wrench, Sparkles, Download, FileText, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Save, Mic, MicOff, Menu, Image, Clapperboard, Users, MessageCircle, ArrowRightLeft, Video, Type, AlertCircle, List, Wrench, Sparkles, Download, FileText, ChevronDown, Settings } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { exportScreenplayPdf } from '@/lib/exportPdf';
 import { exportScreenplayFdx } from '@/lib/exportFdx';
 import AIPromptDialog from '@/components/AIPromptDialog';
@@ -22,6 +23,7 @@ export default function Editor() {
   const [showDropdown, setShowDropdown] = useState<{ elementId: string; options: string[] } | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [showAI, setShowAI] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const recognitionRef = useRef<any>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const inputRefs = useRef<Map<string, HTMLTextAreaElement>>(new Map());
@@ -205,6 +207,9 @@ export default function Editor() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <span className="font-bold text-sm truncate max-w-[120px]">{script.title}</span>
+          <button onClick={() => setShowSettings(true)} className="p-1.5 hover:bg-accent rounded-lg active:scale-95 transition-all">
+            <Settings className="w-4 h-4 text-muted-foreground" />
+          </button>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span>{saved ? '☁ Saved' : 'Saving...'}</span>
@@ -389,6 +394,56 @@ export default function Editor() {
           autoSave(updated);
         }}
       />
+
+      {/* Script Settings Dialog */}
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Script Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div>
+              <label className="text-sm font-medium text-foreground">Title</label>
+              <input
+                value={script.title}
+                onChange={(e) => {
+                  const updated = { ...script, title: e.target.value };
+                  setScript(updated);
+                  autoSave(updated);
+                }}
+                className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground">Author Name</label>
+              <input
+                value={script.authorName || ''}
+                onChange={(e) => {
+                  const updated = { ...script, authorName: e.target.value };
+                  setScript(updated);
+                  autoSave(updated);
+                }}
+                placeholder="Your name"
+                className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground">Contact Info</label>
+              <textarea
+                value={script.contactInfo || ''}
+                onChange={(e) => {
+                  const updated = { ...script, contactInfo: e.target.value };
+                  setScript(updated);
+                  autoSave(updated);
+                }}
+                placeholder="Email, phone, address..."
+                rows={3}
+                className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none resize-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

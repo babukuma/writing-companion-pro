@@ -101,7 +101,15 @@ export function exportScreenplayPdf(script: Script) {
   doc.setFont('courier', 'normal');
   doc.setFontSize(FONT_SIZE);
   doc.text('written by', PAGE_WIDTH / 2, titleY + 0.8, { align: 'center' });
-  doc.text('Author', PAGE_WIDTH / 2, titleY + 1.2, { align: 'center' });
+  doc.text(script.authorName || 'Author', PAGE_WIDTH / 2, titleY + 1.2, { align: 'center' });
+
+  if (script.contactInfo) {
+    doc.setFontSize(10);
+    const contactLines = script.contactInfo.split('\n');
+    contactLines.forEach((line, i) => {
+      doc.text(line, MARGIN_LEFT, PAGE_HEIGHT - MARGIN_BOTTOM - (contactLines.length - i) * 0.25);
+    });
+  }
 
   // Start screenplay content on page 2
   doc.addPage();
