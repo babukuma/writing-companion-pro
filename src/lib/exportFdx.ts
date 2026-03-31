@@ -51,8 +51,11 @@ ${paragraphs}
         <Text>written by</Text>
       </Paragraph>
       <Paragraph Type="Title Page">
-        <Text>Author</Text>
-      </Paragraph>
+        <Text>${escapeXml(script.authorName || 'Author')}</Text>
+      </Paragraph>${script.contactInfo ? `
+      <Paragraph Type="Title Page">
+        <Text>${escapeXml(script.contactInfo)}</Text>
+      </Paragraph>` : ''}
     </Content>
   </TitlePage>
 </FinalDraft>`;
