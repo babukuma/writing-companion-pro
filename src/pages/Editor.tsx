@@ -394,6 +394,56 @@ export default function Editor() {
           autoSave(updated);
         }}
       />
+
+      {/* Script Settings Dialog */}
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Script Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div>
+              <label className="text-sm font-medium text-foreground">Title</label>
+              <input
+                value={script.title}
+                onChange={(e) => {
+                  const updated = { ...script, title: e.target.value };
+                  setScript(updated);
+                  autoSave(updated);
+                }}
+                className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground">Author Name</label>
+              <input
+                value={script.authorName || ''}
+                onChange={(e) => {
+                  const updated = { ...script, authorName: e.target.value };
+                  setScript(updated);
+                  autoSave(updated);
+                }}
+                placeholder="Your name"
+                className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground">Contact Info</label>
+              <textarea
+                value={script.contactInfo || ''}
+                onChange={(e) => {
+                  const updated = { ...script, contactInfo: e.target.value };
+                  setScript(updated);
+                  autoSave(updated);
+                }}
+                placeholder="Email, phone, address..."
+                rows={3}
+                className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none resize-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
