@@ -211,6 +211,10 @@ export default function Editor() {
             <Save className="w-3.5 h-3.5" />
             Save
           </button>
+          <button onClick={() => exportScreenplayPdf(script)} className="flex items-center gap-1 bg-primary text-primary-foreground rounded-lg px-3 py-1.5 font-medium hover:bg-primary/90 active:scale-95 transition-all">
+            <Download className="w-3.5 h-3.5" />
+            PDF
+          </button>
         </div>
       </header>
 
