@@ -216,6 +216,10 @@ export default function Editor() {
             <Download className="w-3.5 h-3.5" />
             PDF
           </button>
+          <button onClick={() => exportScreenplayFdx(script)} className="flex items-center gap-1 bg-card border rounded-lg px-3 py-1.5 font-medium hover:bg-accent active:scale-95 transition-all">
+            <FileText className="w-3.5 h-3.5" />
+            FDX
+          </button>
         </div>
       </header>
 
