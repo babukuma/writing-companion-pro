@@ -20,6 +20,7 @@ const ELEMENT_TYPES: ScriptElementType[] = [
 
 export default function Editor() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const isOnline = useOnlineStatus();
   const [script, setScript] = useState<Script | null>(null);
