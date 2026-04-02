@@ -47,9 +47,10 @@ export default function Editor() {
     saveTimerRef.current = setTimeout(() => {
       updated.updatedAt = new Date().toISOString();
       saveScript(updated);
+      saveScriptOfflineAware(updated, isOnline, user?.id);
       setSaved(true);
     }, 800);
-  }, []);
+  }, [isOnline, user]);
 
   const updateElement = (elementId: string, content: string) => {
     if (!script) return;
