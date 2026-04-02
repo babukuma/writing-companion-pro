@@ -34,7 +34,7 @@ export function getPendingSyncIds(): string[] {
 
 // Cloud operations
 export async function fetchCloudScripts(userId: string): Promise<Script[]> {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('scripts')
     .select('*')
     .eq('user_id', userId)
@@ -42,7 +42,7 @@ export async function fetchCloudScripts(userId: string): Promise<Script[]> {
 
   if (error) throw error;
 
-  return (data || []).map(row => ({
+  return (data || []).map((row: any) => ({
     id: row.id,
     title: row.title,
     authorName: row.author_name || undefined,
@@ -54,7 +54,7 @@ export async function fetchCloudScripts(userId: string): Promise<Script[]> {
 }
 
 export async function saveCloudScript(userId: string, script: Script) {
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from('scripts')
     .upsert({
       id: script.id,
@@ -71,7 +71,7 @@ export async function saveCloudScript(userId: string, script: Script) {
 }
 
 export async function deleteCloudScript(scriptId: string) {
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from('scripts')
     .delete()
     .eq('id', scriptId);
@@ -138,7 +138,6 @@ export async function mergeCloudAndLocal(userId: string): Promise<Script[]> {
   try {
     const cloud = await fetchCloudScripts(userId);
 
-    // Merge: cloud wins if newer, local wins if newer
     const merged = new Map<string, Script>();
 
     for (const s of cloud) merged.set(s.id, s);
@@ -147,7 +146,6 @@ export async function mergeCloudAndLocal(userId: string): Promise<Script[]> {
       const existing = merged.get(s.id);
       if (!existing || new Date(s.updatedAt) > new Date(existing.updatedAt)) {
         merged.set(s.id, s);
-        // Push local-newer to cloud
         saveCloudScript(userId, s).catch(() => markPendingSync(s.id));
       }
     }
@@ -159,7 +157,6 @@ export async function mergeCloudAndLocal(userId: string): Promise<Script[]> {
     saveLocalScripts(result);
     return result;
   } catch {
-    // Offline - return local
     return local;
   }
 }
