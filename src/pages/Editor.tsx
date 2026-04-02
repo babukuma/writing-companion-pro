@@ -20,7 +20,8 @@ const ELEMENT_TYPES: ScriptElementType[] = [
 
 export default function Editor() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { user } = useAuth();
+  const isOnline = useOnlineStatus();
   const [script, setScript] = useState<Script | null>(null);
   const [activeType, setActiveType] = useState<ScriptElementType>('scene-heading');
   const [saved, setSaved] = useState(true);
