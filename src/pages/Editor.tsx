@@ -219,6 +219,7 @@ export default function Editor() {
           </button>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <OnlineStatus />
           <span>{saved ? '☁ Saved' : 'Saving...'}</span>
           <span>{pageCount} pg</span>
           <button onClick={manualSave} className="flex items-center gap-1 bg-card border rounded-lg px-3 py-1.5 font-medium hover:bg-accent active:scale-95 transition-all">
