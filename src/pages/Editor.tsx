@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getScript, saveScript } from '@/lib/storage';
+import { saveScriptOfflineAware } from '@/lib/syncService';
+import { useAuth } from '@/hooks/useAuth';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { OnlineStatus } from '@/components/OnlineStatus';
 import { Script, ScriptElement, ScriptElementType, ELEMENT_LABELS, SCENE_HEADING_OPTIONS, TRANSITION_OPTIONS } from '@/lib/types';
 import { ArrowLeft, Save, Mic, MicOff, Menu, Image, Clapperboard, Users, MessageCircle, ArrowRightLeft, Video, Type, AlertCircle, List, Wrench, Sparkles, Download, FileText, ChevronDown, Settings } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -17,6 +21,8 @@ const ELEMENT_TYPES: ScriptElementType[] = [
 export default function Editor() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isOnline = useOnlineStatus();
   const [script, setScript] = useState<Script | null>(null);
   const [activeType, setActiveType] = useState<ScriptElementType>('scene-heading');
   const [saved, setSaved] = useState(true);
@@ -42,9 +48,10 @@ export default function Editor() {
     saveTimerRef.current = setTimeout(() => {
       updated.updatedAt = new Date().toISOString();
       saveScript(updated);
+      saveScriptOfflineAware(updated, isOnline, user?.id);
       setSaved(true);
     }, 800);
-  }, []);
+  }, [isOnline, user]);
 
   const updateElement = (elementId: string, content: string) => {
     if (!script) return;
@@ -212,6 +219,7 @@ export default function Editor() {
           </button>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <OnlineStatus />
           <span>{saved ? '☁ Saved' : 'Saving...'}</span>
           <span>{pageCount} pg</span>
           <button onClick={manualSave} className="flex items-center gap-1 bg-card border rounded-lg px-3 py-1.5 font-medium hover:bg-accent active:scale-95 transition-all">

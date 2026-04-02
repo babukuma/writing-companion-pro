@@ -1,24 +1,70 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getScripts, createScript, deleteScript, setLoggedIn } from '@/lib/storage';
+import { useAuth } from '@/hooks/useAuth';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { OnlineStatus } from '@/components/OnlineStatus';
+import { mergeCloudAndLocal, saveScriptOfflineAware, deleteScriptOfflineAware, syncPendingScripts, getPendingSyncIds } from '@/lib/syncService';
+import { getScripts, createScript, deleteScript } from '@/lib/storage';
 import { Script } from '@/lib/types';
-import { Plus, LogOut, Trash2, X } from 'lucide-react';
+import { Plus, LogOut, Trash2, X, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const isOnline = useOnlineStatus();
   const [scripts, setScripts] = useState<Script[]>([]);
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
 
+  // Load and merge scripts
   useEffect(() => {
-    setScripts(getScripts());
-  }, []);
+    async function load() {
+      if (user && isOnline) {
+        try {
+          const merged = await mergeCloudAndLocal(user.id);
+          setScripts(merged);
+        } catch {
+          setScripts(getScripts());
+        }
+      } else {
+        setScripts(getScripts());
+      }
+    }
+    load();
+  }, [user, isOnline]);
+
+  // Auto-sync when coming back online
+  useEffect(() => {
+    if (isOnline && user && getPendingSyncIds().length > 0) {
+      handleSync();
+    }
+  }, [isOnline, user]);
+
+  const handleSync = async () => {
+    if (!user || syncing) return;
+    setSyncing(true);
+    try {
+      const count = await syncPendingScripts(user.id);
+      if (count > 0) toast.success(`Synced ${count} script${count > 1 ? 's' : ''}`);
+      const merged = await mergeCloudAndLocal(user.id);
+      setScripts(merged);
+    } catch {
+      toast.error('Sync failed, will retry later');
+    }
+    setSyncing(false);
+  };
 
   const handleCreate = () => {
     if (!newTitle.trim()) return;
     const script = createScript(newTitle.trim());
+    // Also save to cloud
+    if (user) {
+      saveScriptOfflineAware(script, isOnline, user.id);
+    }
     setShowNewDialog(false);
     setNewTitle('');
     navigate(`/editor/${script.id}`);
@@ -27,12 +73,13 @@ export default function Dashboard() {
   const handleDelete = () => {
     if (!deleteId) return;
     deleteScript(deleteId);
-    setScripts(getScripts());
+    deleteScriptOfflineAware(deleteId, isOnline);
+    setScripts(prev => prev.filter(s => s.id !== deleteId));
     setDeleteId(null);
   };
 
-  const handleLogout = () => {
-    setLoggedIn(false);
+  const handleLogout = async () => {
+    await signOut();
     navigate('/');
   };
 
@@ -47,17 +94,34 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       <header className="flex items-center justify-between px-5 py-4 bg-card border-b">
-        <h1 className="text-xl font-bold tracking-tight">ScriptCraft</h1>
-        <button onClick={handleLogout} className="text-muted-foreground hover:text-foreground active:scale-95 transition-all">
-          <LogOut className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-bold tracking-tight">ScriptCraft</h1>
+          <OnlineStatus />
+        </div>
+        <div className="flex items-center gap-2">
+          {isOnline && getPendingSyncIds().length > 0 && (
+            <button
+              onClick={handleSync}
+              disabled={syncing}
+              className="text-muted-foreground hover:text-foreground active:scale-95 transition-all"
+              title="Sync pending changes"
+            >
+              <RefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
+            </button>
+          )}
+          <button onClick={handleLogout} className="text-muted-foreground hover:text-foreground active:scale-95 transition-all">
+            <LogOut className="w-5 h-5" />
+          </button>
+        </div>
       </header>
 
       <main className="max-w-2xl mx-auto px-5 py-8">
         <div className="flex items-end justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">Your Scripts</h2>
-            <p className="text-sm text-muted-foreground mt-0.5">Unlimited projects</p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {isOnline ? 'Synced to cloud' : 'Working offline'}
+            </p>
           </div>
           <button
             onClick={() => setShowNewDialog(true)}
