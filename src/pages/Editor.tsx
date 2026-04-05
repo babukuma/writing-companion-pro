@@ -238,7 +238,11 @@ export default function Editor() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => exportScreenplayPdf(script)}>
                 <Download className="w-4 h-4 mr-2" />
-                Export as PDF
+                Export Full Script as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowCharacterExport(true)}>
+                <User className="w-4 h-4 mr-2" />
+                Export Character Dialogue PDF
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => exportScreenplayFdx(script)}>
                 <FileText className="w-4 h-4 mr-2" />
