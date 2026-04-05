@@ -64,6 +64,82 @@ function wrapText(text: string, maxChars: number): string[] {
   return lines.length ? lines : [''];
 }
 
+export function getCharacterNames(script: Script): string[] {
+  const names = new Set<string>();
+  for (const el of script.elements) {
+    if (el.type === 'character' && el.content.trim()) {
+      names.add(el.content.trim().toUpperCase());
+    }
+  }
+  return Array.from(names).sort();
+}
+
+export function exportCharacterDialoguePdf(script: Script, characterName: string) {
+  const doc = new jsPDF({ unit: 'in', format: 'letter' });
+  setupFont(doc);
+
+  const upperChar = characterName.toUpperCase();
+
+  // Title page
+  doc.setFont('courier', 'bold');
+  doc.setFontSize(18);
+  doc.text(`${upperChar} — DIALOGUE`, PAGE_WIDTH / 2, 3, { align: 'center' });
+  doc.setFont('courier', 'normal');
+  doc.setFontSize(FONT_SIZE);
+  doc.text(`from "${script.title}"`, PAGE_WIDTH / 2, 3.6, { align: 'center' });
+  if (script.authorName) {
+    doc.text(`by ${script.authorName}`, PAGE_WIDTH / 2, 4.0, { align: 'center' });
+  }
+
+  doc.addPage();
+  setupFont(doc);
+  let currentLine = 0;
+  let pageNum = 1;
+
+  const toY = (line: number) => MARGIN_TOP + line * LINE_HEIGHT;
+
+  function newPage() {
+    doc.addPage();
+    pageNum++;
+    currentLine = 0;
+    setupFont(doc);
+    // page number
+    doc.text(`${pageNum}.`, PAGE_WIDTH - MARGIN_RIGHT, MARGIN_TOP - 0.3, { align: 'right' });
+  }
+
+  // Walk elements, find character + following dialogue/parenthetical
+  for (let i = 0; i < script.elements.length; i++) {
+    const el = script.elements[i];
+    if (el.type === 'character' && el.content.trim().toUpperCase() === upperChar) {
+      // Print character name
+      if (currentLine + 2 > LINES_PER_PAGE) newPage();
+      currentLine += 1; // space before
+      doc.setFont('courier', 'bold');
+      doc.text(upperChar, MARGIN_LEFT + 2.2, toY(currentLine));
+      currentLine++;
+      doc.setFont('courier', 'normal');
+
+      // Print following dialogue/parenthetical lines
+      let j = i + 1;
+      while (j < script.elements.length && (script.elements[j].type === 'dialogue' || script.elements[j].type === 'parenthetical')) {
+        const dlg = script.elements[j];
+        const text = dlg.content || '';
+        const lines = wrapText(text, 40);
+        for (const line of lines) {
+          if (currentLine >= LINES_PER_PAGE) newPage();
+          const indent = dlg.type === 'parenthetical' ? 1.6 : 1;
+          const printLine = dlg.type === 'parenthetical' ? `(${line})` : line;
+          doc.text(printLine, MARGIN_LEFT + indent, toY(currentLine));
+          currentLine++;
+        }
+        j++;
+      }
+    }
+  }
+
+  doc.save(`${script.title.replace(/[^a-zA-Z0-9]/g, '_')}_${upperChar}.pdf`);
+}
+
 export function exportScreenplayPdf(script: Script) {
   const doc = new jsPDF({ unit: 'in', format: 'letter' });
   setupFont(doc);

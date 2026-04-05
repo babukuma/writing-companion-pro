@@ -9,7 +9,7 @@ import { Script, ScriptElement, ScriptElementType, ELEMENT_LABELS, SCENE_HEADING
 import { ArrowLeft, Save, Mic, MicOff, Menu, Image, Clapperboard, Users, MessageCircle, ArrowRightLeft, Video, Type, AlertCircle, List, Wrench, Sparkles, Download, FileText, ChevronDown, Settings } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { exportScreenplayPdf } from '@/lib/exportPdf';
+import { exportScreenplayPdf, exportCharacterDialoguePdf, getCharacterNames } from '@/lib/exportPdf';
 import { exportScreenplayFdx } from '@/lib/exportFdx';
 import AIPromptDialog from '@/components/AIPromptDialog';
 
