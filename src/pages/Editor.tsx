@@ -410,6 +410,15 @@ export default function Editor() {
         }}
       />
 
+      {/* Sidebar Menu */}
+      <EditorSidebar
+        open={showSidebar}
+        onOpenChange={setShowSidebar}
+        script={script}
+        onSave={manualSave}
+        onOpenSettings={() => setShowSettings(true)}
+      />
+
       {/* Script Settings Dialog */}
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent className="max-w-sm">
