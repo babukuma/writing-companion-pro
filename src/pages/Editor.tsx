@@ -6,10 +6,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { OnlineStatus } from '@/components/OnlineStatus';
 import { Script, ScriptElement, ScriptElementType, ELEMENT_LABELS, SCENE_HEADING_OPTIONS, TRANSITION_OPTIONS } from '@/lib/types';
-import { ArrowLeft, Save, Mic, MicOff, Menu, Image, Clapperboard, Users, MessageCircle, ArrowRightLeft, Video, Type, AlertCircle, List, Wrench, Sparkles, Download, FileText, ChevronDown, Settings } from 'lucide-react';
+import { ArrowLeft, Save, Mic, MicOff, Menu, Image, Clapperboard, Users, MessageCircle, ArrowRightLeft, Video, Type, AlertCircle, List, Wrench, Sparkles, Download, FileText, ChevronDown, Settings, User } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { exportScreenplayPdf } from '@/lib/exportPdf';
+import { exportScreenplayPdf, exportCharacterDialoguePdf, getCharacterNames } from '@/lib/exportPdf';
 import { exportScreenplayFdx } from '@/lib/exportFdx';
 import AIPromptDialog from '@/components/AIPromptDialog';
 
@@ -30,6 +30,7 @@ export default function Editor() {
   const [isListening, setIsListening] = useState(false);
   const [showAI, setShowAI] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showCharacterExport, setShowCharacterExport] = useState(false);
   const recognitionRef = useRef<any>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const inputRefs = useRef<Map<string, HTMLTextAreaElement>>(new Map());
@@ -237,7 +238,11 @@ export default function Editor() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => exportScreenplayPdf(script)}>
                 <Download className="w-4 h-4 mr-2" />
-                Export as PDF
+                Export Full Script as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowCharacterExport(true)}>
+                <User className="w-4 h-4 mr-2" />
+                Export Character Dialogue PDF
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => exportScreenplayFdx(script)}>
                 <FileText className="w-4 h-4 mr-2" />
@@ -449,6 +454,34 @@ export default function Editor() {
                 className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none resize-none focus:ring-2 focus:ring-primary"
               />
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* Character Export Dialog */}
+      <Dialog open={showCharacterExport} onOpenChange={setShowCharacterExport}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Export Character Dialogue</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Select a character to export only their dialogues as PDF:</p>
+          <div className="space-y-2 pt-2 max-h-60 overflow-y-auto">
+            {getCharacterNames(script).length === 0 ? (
+              <p className="text-sm text-muted-foreground italic">No characters found in this script.</p>
+            ) : (
+              getCharacterNames(script).map(name => (
+                <button
+                  key={name}
+                  onClick={() => {
+                    exportCharacterDialoguePdf(script, name);
+                    setShowCharacterExport(false);
+                  }}
+                  className="w-full text-left px-4 py-3 rounded-lg border bg-card hover:bg-accent transition-colors font-medium text-sm"
+                >
+                  <User className="w-4 h-4 inline mr-2" />
+                  {name}
+                </button>
+              ))
+            )}
           </div>
         </DialogContent>
       </Dialog>
