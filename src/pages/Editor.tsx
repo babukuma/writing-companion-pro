@@ -457,6 +457,34 @@ export default function Editor() {
           </div>
         </DialogContent>
       </Dialog>
+      {/* Character Export Dialog */}
+      <Dialog open={showCharacterExport} onOpenChange={setShowCharacterExport}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Export Character Dialogue</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Select a character to export only their dialogues as PDF:</p>
+          <div className="space-y-2 pt-2 max-h-60 overflow-y-auto">
+            {getCharacterNames(script).length === 0 ? (
+              <p className="text-sm text-muted-foreground italic">No characters found in this script.</p>
+            ) : (
+              getCharacterNames(script).map(name => (
+                <button
+                  key={name}
+                  onClick={() => {
+                    exportCharacterDialoguePdf(script, name);
+                    setShowCharacterExport(false);
+                  }}
+                  className="w-full text-left px-4 py-3 rounded-lg border bg-card hover:bg-accent transition-colors font-medium text-sm"
+                >
+                  <User className="w-4 h-4 inline mr-2" />
+                  {name}
+                </button>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
