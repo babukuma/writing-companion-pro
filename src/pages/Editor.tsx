@@ -257,7 +257,7 @@ export default function Editor() {
 
       {/* Toolbar */}
       <div className="flex items-center bg-toolbar-bg border-b shrink-0">
-        <button className="flex flex-col items-center justify-center px-3 py-2 border-r border-border/30 text-toolbar-foreground/70 hover:text-toolbar-foreground transition-colors">
+        <button onClick={() => setShowSidebar(true)} className="flex flex-col items-center justify-center px-3 py-2 border-r border-border/30 text-toolbar-foreground/70 hover:text-toolbar-foreground transition-colors">
           <Menu className="w-5 h-5" />
         </button>
         <div className="flex items-center overflow-x-auto flex-1">
