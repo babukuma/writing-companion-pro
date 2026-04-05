@@ -32,6 +32,7 @@ export default function Editor() {
   const [showAI, setShowAI] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showCharacterExport, setShowCharacterExport] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const recognitionRef = useRef<any>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const inputRefs = useRef<Map<string, HTMLTextAreaElement>>(new Map());
