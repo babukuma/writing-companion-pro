@@ -64,6 +64,12 @@ export default function Dashboard() {
 
   const handleCreate = () => {
     if (!newTitle.trim()) return;
+    // Check project limit for free users
+    if (!subscription.isPro && scripts.length >= FREE_PROJECT_LIMIT) {
+      setShowNewDialog(false);
+      setShowPaywall(true);
+      return;
+    }
     const script = createScript(newTitle.trim());
     // Also save to cloud
     if (user) {
