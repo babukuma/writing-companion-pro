@@ -41,7 +41,7 @@ export default function Editor() {
   const [showPaywall, setShowPaywall] = useState(false);
   const subscription = useSubscription();
 
-  const isPageLimitReached = !subscription.isPro && pageCount > FREE_PAGE_LIMIT;
+  // isPageLimitReached computed after pageCount below
 
   useEffect(() => {
     if (!id) return;
