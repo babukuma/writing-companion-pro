@@ -28,6 +28,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<PublicRoute><Login /></PublicRoute>} />
+    <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
     <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
     <Route path="/editor/:id" element={<ProtectedRoute><Editor /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
