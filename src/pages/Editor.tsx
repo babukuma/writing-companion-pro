@@ -6,13 +6,15 @@ import { useAuth } from '@/hooks/useAuth';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { OnlineStatus } from '@/components/OnlineStatus';
 import { Script, ScriptElement, ScriptElementType, ELEMENT_LABELS, SCENE_HEADING_OPTIONS, TRANSITION_OPTIONS } from '@/lib/types';
-import { ArrowLeft, Save, Mic, MicOff, Menu, Image, Clapperboard, Users, MessageCircle, ArrowRightLeft, Video, Type, AlertCircle, List, Sparkles, Download, FileText, ChevronDown, Settings, User } from 'lucide-react';
+import { ArrowLeft, Save, Mic, MicOff, Menu, Image, Clapperboard, Users, MessageCircle, ArrowRightLeft, Video, Type, AlertCircle, List, Sparkles, Download, FileText, ChevronDown, Settings, User, Lock } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { exportScreenplayPdf, exportCharacterDialoguePdf, getCharacterNames } from '@/lib/exportPdf';
 import { exportScreenplayFdx } from '@/lib/exportFdx';
 import AIPromptDialog from '@/components/AIPromptDialog';
 import EditorSidebar from '@/components/EditorSidebar';
+import PaywallModal from '@/components/PaywallModal';
+import { useSubscription, FREE_PAGE_LIMIT } from '@/hooks/useSubscription';
 
 const ELEMENT_TYPES: ScriptElementType[] = [
   'scene-heading', 'action', 'character', 'parenthetical',
@@ -36,6 +38,10 @@ export default function Editor() {
   const recognitionRef = useRef<any>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const inputRefs = useRef<Map<string, HTMLTextAreaElement>>(new Map());
+  const [showPaywall, setShowPaywall] = useState(false);
+  const subscription = useSubscription();
+
+  // isPageLimitReached computed after pageCount below
 
   useEffect(() => {
     if (!id) return;
@@ -205,6 +211,8 @@ export default function Editor() {
       return lines + contentLines + spacing;
     }, 0) / 56
   )) : 1;
+
+  const isPageLimitReached = !subscription.isPro && pageCount > FREE_PAGE_LIMIT;
 
   if (!script) return null;
 
@@ -496,6 +504,29 @@ export default function Editor() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Page limit overlay */}
+      {isPageLimitReached && (
+        <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur border-t px-4 py-3 flex items-center justify-between z-40">
+          <div>
+            <p className="text-sm font-semibold flex items-center gap-1.5"><Lock className="w-4 h-4" /> Page limit reached</p>
+            <p className="text-xs text-muted-foreground">Free plan: max {FREE_PAGE_LIMIT} pages</p>
+          </div>
+          <button
+            onClick={() => setShowPaywall(true)}
+            className="bg-primary text-primary-foreground font-semibold px-4 py-2 rounded-lg text-sm active:scale-95 transition-all"
+          >
+            Upgrade
+          </button>
+        </div>
+      )}
+
+      <PaywallModal
+        open={showPaywall}
+        onOpenChange={setShowPaywall}
+        reason="page_limit"
+        onUpgraded={() => subscription.refresh()}
+      />
     </div>
   );
 }

@@ -6,9 +6,11 @@ import { OnlineStatus } from '@/components/OnlineStatus';
 import { mergeCloudAndLocal, saveScriptOfflineAware, deleteScriptOfflineAware, syncPendingScripts, getPendingSyncIds } from '@/lib/syncService';
 import { getScripts, createScript, deleteScript } from '@/lib/storage';
 import { Script } from '@/lib/types';
-import { Plus, LogOut, Trash2, X, RefreshCw } from 'lucide-react';
+import { Plus, LogOut, Trash2, X, RefreshCw, Crown } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { useSubscription, FREE_PROJECT_LIMIT } from '@/hooks/useSubscription';
+import PaywallModal from '@/components/PaywallModal';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -19,6 +21,8 @@ export default function Dashboard() {
   const [newTitle, setNewTitle] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const subscription = useSubscription();
 
   // Load and merge scripts
   useEffect(() => {
@@ -60,6 +64,12 @@ export default function Dashboard() {
 
   const handleCreate = () => {
     if (!newTitle.trim()) return;
+    // Check project limit for free users
+    if (!subscription.isPro && scripts.length >= FREE_PROJECT_LIMIT) {
+      setShowNewDialog(false);
+      setShowPaywall(true);
+      return;
+    }
     const script = createScript(newTitle.trim());
     // Also save to cloud
     if (user) {
@@ -97,6 +107,11 @@ export default function Dashboard() {
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-bold tracking-tight">ScriptCraft</h1>
           <OnlineStatus />
+          {subscription.isPro && (
+            <span className="flex items-center gap-1 text-xs font-semibold bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">
+              <Crown className="w-3 h-3" /> PRO
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {isOnline && getPendingSyncIds().length > 0 && (
@@ -208,6 +223,29 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Upgrade Banner for free users */}
+      {!subscription.isPro && !subscription.loading && (
+        <div className="fixed bottom-0 left-0 right-0 bg-card border-t px-5 py-3 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium">Free Plan — {FREE_PROJECT_LIMIT} project, 4 pages</p>
+            <p className="text-xs text-muted-foreground">Upgrade for unlimited access</p>
+          </div>
+          <button
+            onClick={() => setShowPaywall(true)}
+            className="flex items-center gap-1.5 bg-primary text-primary-foreground font-semibold px-4 py-2 rounded-lg text-sm active:scale-95 transition-all"
+          >
+            <Crown className="w-4 h-4" /> Upgrade
+          </button>
+        </div>
+      )}
+
+      <PaywallModal
+        open={showPaywall}
+        onOpenChange={setShowPaywall}
+        reason="project_limit"
+        onUpgraded={() => subscription.refresh()}
+      />
     </div>
   );
 }
