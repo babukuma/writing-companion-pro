@@ -21,6 +21,8 @@ export default function Dashboard() {
   const [newTitle, setNewTitle] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const subscription = useSubscription();
 
   // Load and merge scripts
   useEffect(() => {
