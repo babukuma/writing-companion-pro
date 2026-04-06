@@ -107,6 +107,11 @@ export default function Dashboard() {
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-bold tracking-tight">ScriptCraft</h1>
           <OnlineStatus />
+          {subscription.isPro && (
+            <span className="flex items-center gap-1 text-xs font-semibold bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">
+              <Crown className="w-3 h-3" /> PRO
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {isOnline && getPendingSyncIds().length > 0 && (
