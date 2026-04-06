@@ -223,6 +223,29 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Upgrade Banner for free users */}
+      {!subscription.isPro && !subscription.loading && (
+        <div className="fixed bottom-0 left-0 right-0 bg-card border-t px-5 py-3 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium">Free Plan — {FREE_PROJECT_LIMIT} project, 4 pages</p>
+            <p className="text-xs text-muted-foreground">Upgrade for unlimited access</p>
+          </div>
+          <button
+            onClick={() => setShowPaywall(true)}
+            className="flex items-center gap-1.5 bg-primary text-primary-foreground font-semibold px-4 py-2 rounded-lg text-sm active:scale-95 transition-all"
+          >
+            <Crown className="w-4 h-4" /> Upgrade
+          </button>
+        </div>
+      )}
+
+      <PaywallModal
+        open={showPaywall}
+        onOpenChange={setShowPaywall}
+        reason="project_limit"
+        onUpgraded={() => subscription.refresh()}
+      />
     </div>
   );
 }
