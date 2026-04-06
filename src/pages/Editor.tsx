@@ -212,6 +212,8 @@ export default function Editor() {
     }, 0) / 56
   )) : 1;
 
+  const isPageLimitReached = !subscription.isPro && pageCount > FREE_PAGE_LIMIT;
+
   if (!script) return null;
 
   return (
