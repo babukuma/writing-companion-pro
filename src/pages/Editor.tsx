@@ -38,6 +38,10 @@ export default function Editor() {
   const recognitionRef = useRef<any>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const inputRefs = useRef<Map<string, HTMLTextAreaElement>>(new Map());
+  const [showPaywall, setShowPaywall] = useState(false);
+  const subscription = useSubscription();
+
+  const isPageLimitReached = !subscription.isPro && pageCount > FREE_PAGE_LIMIT;
 
   useEffect(() => {
     if (!id) return;
