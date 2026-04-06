@@ -504,6 +504,29 @@ export default function Editor() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Page limit overlay */}
+      {isPageLimitReached && (
+        <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur border-t px-4 py-3 flex items-center justify-between z-40">
+          <div>
+            <p className="text-sm font-semibold flex items-center gap-1.5"><Lock className="w-4 h-4" /> Page limit reached</p>
+            <p className="text-xs text-muted-foreground">Free plan: max {FREE_PAGE_LIMIT} pages</p>
+          </div>
+          <button
+            onClick={() => setShowPaywall(true)}
+            className="bg-primary text-primary-foreground font-semibold px-4 py-2 rounded-lg text-sm active:scale-95 transition-all"
+          >
+            Upgrade
+          </button>
+        </div>
+      )}
+
+      <PaywallModal
+        open={showPaywall}
+        onOpenChange={setShowPaywall}
+        reason="page_limit"
+        onUpgraded={() => subscription.refresh()}
+      />
     </div>
   );
 }
