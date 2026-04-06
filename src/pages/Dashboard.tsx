@@ -6,9 +6,11 @@ import { OnlineStatus } from '@/components/OnlineStatus';
 import { mergeCloudAndLocal, saveScriptOfflineAware, deleteScriptOfflineAware, syncPendingScripts, getPendingSyncIds } from '@/lib/syncService';
 import { getScripts, createScript, deleteScript } from '@/lib/storage';
 import { Script } from '@/lib/types';
-import { Plus, LogOut, Trash2, X, RefreshCw } from 'lucide-react';
+import { Plus, LogOut, Trash2, X, RefreshCw, Crown } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { useSubscription, FREE_PROJECT_LIMIT } from '@/hooks/useSubscription';
+import PaywallModal from '@/components/PaywallModal';
 
 export default function Dashboard() {
   const navigate = useNavigate();
