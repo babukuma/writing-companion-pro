@@ -44,7 +44,7 @@ export default function Dashboard() {
 
   // Auto-sync when coming back online
   useEffect(() => {
-    if (isOnline && user && getPendingSyncIds().length > 0) {
+    if (isOnline && user && getPendingSyncIds(user.id).length > 0) {
       handleSync();
     }
   }, [isOnline, user]);
