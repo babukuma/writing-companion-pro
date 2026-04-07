@@ -40,4 +40,13 @@ export const ELEMENT_LABELS: Record<ScriptElementType, { short: string; full: st
 };
 
 export const SCENE_HEADING_OPTIONS = ['INT.', 'EXT.', 'INT./EXT.'];
-export const TRANSITION_OPTIONS = ['CUT TO:', 'FADE IN:', 'FADE OUT.', 'DISSOLVE TO:', 'SMASH CUT TO:'];
+export const TRANSITION_OPTIONS = [
+  'CUT TO:', 'FADE IN:', 'FADE OUT:', 'FADE TO BLACK:', 'FADE FROM BLACK:',
+  'DISSOLVE TO:', 'SMASH CUT TO:', 'MATCH CUT TO:', 'WIPE TO:',
+  'IRIS IN:', 'IRIS OUT:', 'PUSH IN:', 'PULL BACK TO:',
+  'ZOOM IN:', 'ZOOM OUT:', 'JUMP CUT TO:', 'CROSSFADE:',
+  'TIME CUT:', 'FLASH CUT:', 'SLOW FADE TO:', 'QUICK CUT TO:',
+  'SOUND BRIDGE TO:', 'AUDIO CUT TO:', 'PRE-LAP:',
+  'L-CUT:', 'J-CUT:', 'HARD CUT TO:', 'SOFT CUT TO:',
+  'GLITCH CUT TO:', 'DREAM CUT TO:', 'MEMORY CUT TO:', 'FANTASY CUT TO:',
+];
