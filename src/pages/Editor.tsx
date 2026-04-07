@@ -411,7 +411,7 @@ export default function Editor() {
                     }}
                   />
                   {showDropdown?.elementId === el.id && (
-                    <div className="absolute left-0 top-full z-10 bg-card border rounded-lg shadow-lg py-1 min-w-[140px]">
+                    <div className="absolute left-0 top-full z-10 bg-card border rounded-lg shadow-lg py-1 min-w-[200px] max-h-[240px] overflow-y-auto">
                       {showDropdown.options.map(opt => (
                         <button
                           key={opt}
