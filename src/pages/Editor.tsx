@@ -46,7 +46,7 @@ export default function Editor() {
 
   useEffect(() => {
     if (!id) return;
-    const s = getScript(id);
+    const s = getScript(id, user?.id);
     if (!s) { navigate('/dashboard'); return; }
     setScript(s);
     if (s.elements.length > 0) setActiveType(s.elements[s.elements.length - 1].type);
