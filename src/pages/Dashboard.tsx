@@ -24,18 +24,19 @@ export default function Dashboard() {
   const [showPaywall, setShowPaywall] = useState(false);
   const subscription = useSubscription();
 
-  // Load and merge scripts
+  // Load and merge scripts (user-scoped)
   useEffect(() => {
     async function load() {
-      if (user && isOnline) {
+      if (!user) return;
+      if (isOnline) {
         try {
           const merged = await mergeCloudAndLocal(user.id);
           setScripts(merged);
         } catch {
-          setScripts(getScripts());
+          setScripts(getScripts(user.id));
         }
       } else {
-        setScripts(getScripts());
+        setScripts(getScripts(user.id));
       }
     }
     load();
