@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { OnlineStatus } from '@/components/OnlineStatus';
 import { mergeCloudAndLocal, saveScriptOfflineAware, deleteScriptOfflineAware, syncPendingScripts, getPendingSyncIds } from '@/lib/syncService';
-import { getScripts, createScript, deleteScript } from '@/lib/storage';
+import { getScripts, createScript, deleteScript, clearUserData } from '@/lib/storage';
 import { Script } from '@/lib/types';
 import { Plus, LogOut, Trash2, X, RefreshCw, Crown } from 'lucide-react';
 import { format } from 'date-fns';
