@@ -57,7 +57,7 @@ export default function Editor() {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       updated.updatedAt = new Date().toISOString();
-      saveScript(updated);
+      saveScript(updated, user?.id);
       saveScriptOfflineAware(updated, isOnline, user?.id);
       setSaved(true);
     }, 800);
