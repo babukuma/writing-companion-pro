@@ -244,7 +244,7 @@ export default function Editor() {
       case 'character': return 'uppercase text-center';
       case 'parenthetical': return 'italic text-center';
       case 'dialogue': return 'text-center max-w-[65%] mx-auto';
-      case 'transition': return 'uppercase text-right';
+      case 'transition': return 'uppercase text-right text-primary/80';
       case 'shot': return 'uppercase';
       case 'note': return 'italic text-muted-foreground';
       case 'outline': return 'text-muted-foreground';
