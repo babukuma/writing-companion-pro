@@ -90,6 +90,7 @@ export default function Dashboard() {
   };
 
   const handleLogout = async () => {
+    clearUserData();
     await signOut();
     navigate('/');
   };
