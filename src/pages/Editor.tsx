@@ -30,6 +30,7 @@ export default function Editor() {
   const [activeType, setActiveType] = useState<ScriptElementType>('scene-heading');
   const [saved, setSaved] = useState(true);
   const [showDropdown, setShowDropdown] = useState<{ elementId: string; options: string[] } | null>(null);
+  const [transitionFilter, setTransitionFilter] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [showAI, setShowAI] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -82,6 +83,20 @@ export default function Editor() {
     const updated = { ...script, elements: newElements };
     setScript(updated);
     autoSave(updated);
+
+    // Detect "/" or "transition" to show transition suggestions
+    const trimmed = content.trim().toLowerCase();
+    if (trimmed === '/' || trimmed.startsWith('/')) {
+      const query = trimmed.slice(1);
+      const filtered = TRANSITION_OPTIONS.filter(t => t.toLowerCase().includes(query));
+      if (filtered.length > 0) {
+        setTransitionFilter(query);
+        setShowDropdown({ elementId, options: filtered });
+      }
+    } else if (trimmed === 'transition' || trimmed === 'trans') {
+      setTransitionFilter('');
+      setShowDropdown({ elementId, options: TRANSITION_OPTIONS });
+    }
   };
 
   const addElement = (type?: ScriptElementType) => {
@@ -101,6 +116,12 @@ export default function Editor() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, element: ScriptElement) => {
+    // Ctrl+T → insert transition element
+    if (e.key === 't' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      handleTypeClick('transition');
+      return;
+    }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       // Auto-advance type based on screenplay flow
@@ -161,8 +182,22 @@ export default function Editor() {
   };
 
   const handleDropdownSelect = (elementId: string, value: string) => {
-    updateElement(elementId, value + ' ');
+    if (!script) return;
+    // If it's a transition option, set the element type to transition
+    const isTransition = TRANSITION_OPTIONS.includes(value);
+    if (isTransition) {
+      const newElements = script.elements.map(el =>
+        el.id === elementId ? { ...el, type: 'transition' as ScriptElementType, content: value } : el
+      );
+      const updated = { ...script, elements: newElements };
+      setScript(updated);
+      setActiveType('transition');
+      autoSave(updated);
+    } else {
+      updateElement(elementId, value + ' ');
+    }
     setShowDropdown(null);
+    setTransitionFilter('');
     setTimeout(() => {
       const ta = inputRefs.current.get(elementId);
       if (ta) { ta.focus(); ta.selectionStart = ta.selectionEnd = ta.value.length; }
@@ -209,7 +244,7 @@ export default function Editor() {
       case 'character': return 'uppercase text-center';
       case 'parenthetical': return 'italic text-center';
       case 'dialogue': return 'text-center max-w-[65%] mx-auto';
-      case 'transition': return 'uppercase text-right';
+      case 'transition': return 'uppercase text-right text-primary/80';
       case 'shot': return 'uppercase';
       case 'note': return 'italic text-muted-foreground';
       case 'outline': return 'text-muted-foreground';
@@ -376,7 +411,7 @@ export default function Editor() {
                     }}
                   />
                   {showDropdown?.elementId === el.id && (
-                    <div className="absolute left-0 top-full z-10 bg-card border rounded-lg shadow-lg py-1 min-w-[140px]">
+                    <div className="absolute left-0 top-full z-10 bg-card border rounded-lg shadow-lg py-1 min-w-[200px] max-h-[240px] overflow-y-auto">
                       {showDropdown.options.map(opt => (
                         <button
                           key={opt}
