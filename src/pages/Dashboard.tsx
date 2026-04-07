@@ -105,31 +105,36 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="flex items-center justify-between px-5 py-4 bg-card border-b">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold tracking-tight">ScriptCraft</h1>
-          <OnlineStatus />
-          {subscription.isPro && (
-            <span className="flex items-center gap-1 text-xs font-semibold bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">
-              <Crown className="w-3 h-3" /> PRO
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          {isOnline && getPendingSyncIds().length > 0 && (
-            <button
-              onClick={handleSync}
-              disabled={syncing}
-              className="text-muted-foreground hover:text-foreground active:scale-95 transition-all"
-              title="Sync pending changes"
-            >
-              <RefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
+      <header className="flex flex-col bg-card border-b">
+        <div className="flex items-center justify-between px-5 py-4">
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-bold tracking-tight">ScriptCraft</h1>
+            <OnlineStatus />
+            {subscription.isPro && (
+              <span className="flex items-center gap-1 text-xs font-semibold bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">
+                <Crown className="w-3 h-3" /> PRO
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {isOnline && user && getPendingSyncIds(user.id).length > 0 && (
+              <button
+                onClick={handleSync}
+                disabled={syncing}
+                className="text-muted-foreground hover:text-foreground active:scale-95 transition-all"
+                title="Sync pending changes"
+              >
+                <RefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
+              </button>
+            )}
+            <button onClick={handleLogout} className="text-muted-foreground hover:text-foreground active:scale-95 transition-all">
+              <LogOut className="w-5 h-5" />
             </button>
-          )}
-          <button onClick={handleLogout} className="text-muted-foreground hover:text-foreground active:scale-95 transition-all">
-            <LogOut className="w-5 h-5" />
-          </button>
+          </div>
         </div>
+        {user?.email && (
+          <p className="px-5 pb-3 text-xs text-muted-foreground truncate">Logged in as: {user.email}</p>
+        )}
       </header>
 
       <main className="max-w-2xl mx-auto px-5 py-8">
