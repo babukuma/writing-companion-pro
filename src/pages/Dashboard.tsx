@@ -83,8 +83,8 @@ export default function Dashboard() {
 
   const handleDelete = () => {
     if (!deleteId) return;
-    deleteScript(deleteId);
-    deleteScriptOfflineAware(deleteId, isOnline);
+    deleteScript(deleteId, user?.id);
+    deleteScriptOfflineAware(deleteId, isOnline, user?.id);
     setScripts(prev => prev.filter(s => s.id !== deleteId));
     setDeleteId(null);
   };
