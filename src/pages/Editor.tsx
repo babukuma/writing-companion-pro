@@ -182,8 +182,22 @@ export default function Editor() {
   };
 
   const handleDropdownSelect = (elementId: string, value: string) => {
-    updateElement(elementId, value + ' ');
+    if (!script) return;
+    // If it's a transition option, set the element type to transition
+    const isTransition = TRANSITION_OPTIONS.includes(value);
+    if (isTransition) {
+      const newElements = script.elements.map(el =>
+        el.id === elementId ? { ...el, type: 'transition' as ScriptElementType, content: value } : el
+      );
+      const updated = { ...script, elements: newElements };
+      setScript(updated);
+      setActiveType('transition');
+      autoSave(updated);
+    } else {
+      updateElement(elementId, value + ' ');
+    }
     setShowDropdown(null);
+    setTransitionFilter('');
     setTimeout(() => {
       const ta = inputRefs.current.get(elementId);
       if (ta) { ta.focus(); ta.selectionStart = ta.selectionEnd = ta.value.length; }
