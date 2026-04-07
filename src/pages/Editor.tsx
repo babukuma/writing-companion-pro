@@ -83,6 +83,20 @@ export default function Editor() {
     const updated = { ...script, elements: newElements };
     setScript(updated);
     autoSave(updated);
+
+    // Detect "/" or "transition" to show transition suggestions
+    const trimmed = content.trim().toLowerCase();
+    if (trimmed === '/' || trimmed.startsWith('/')) {
+      const query = trimmed.slice(1);
+      const filtered = TRANSITION_OPTIONS.filter(t => t.toLowerCase().includes(query));
+      if (filtered.length > 0) {
+        setTransitionFilter(query);
+        setShowDropdown({ elementId, options: filtered });
+      }
+    } else if (trimmed === 'transition' || trimmed === 'trans') {
+      setTransitionFilter('');
+      setShowDropdown({ elementId, options: TRANSITION_OPTIONS });
+    }
   };
 
   const addElement = (type?: ScriptElementType) => {
