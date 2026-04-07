@@ -233,7 +233,7 @@ export default function Editor() {
     if (!script) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     script.updatedAt = new Date().toISOString();
-    saveScript(script);
+    saveScript(script, user?.id);
     setSaved(true);
   };
 
