@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { OnlineStatus } from '@/components/OnlineStatus';
 import { mergeCloudAndLocal, saveScriptOfflineAware, deleteScriptOfflineAware, syncPendingScripts, getPendingSyncIds } from '@/lib/syncService';
-import { getScripts, createScript, deleteScript } from '@/lib/storage';
+import { getScripts, createScript, deleteScript, clearUserData } from '@/lib/storage';
 import { Script } from '@/lib/types';
 import { Plus, LogOut, Trash2, X, RefreshCw, Crown } from 'lucide-react';
 import { format } from 'date-fns';
@@ -24,18 +24,19 @@ export default function Dashboard() {
   const [showPaywall, setShowPaywall] = useState(false);
   const subscription = useSubscription();
 
-  // Load and merge scripts
+  // Load and merge scripts (user-scoped)
   useEffect(() => {
     async function load() {
-      if (user && isOnline) {
+      if (!user) return;
+      if (isOnline) {
         try {
           const merged = await mergeCloudAndLocal(user.id);
           setScripts(merged);
         } catch {
-          setScripts(getScripts());
+          setScripts(getScripts(user.id));
         }
       } else {
-        setScripts(getScripts());
+        setScripts(getScripts(user.id));
       }
     }
     load();
@@ -43,7 +44,7 @@ export default function Dashboard() {
 
   // Auto-sync when coming back online
   useEffect(() => {
-    if (isOnline && user && getPendingSyncIds().length > 0) {
+    if (isOnline && user && getPendingSyncIds(user.id).length > 0) {
       handleSync();
     }
   }, [isOnline, user]);
@@ -70,7 +71,7 @@ export default function Dashboard() {
       setShowPaywall(true);
       return;
     }
-    const script = createScript(newTitle.trim());
+    const script = createScript(newTitle.trim(), user?.id);
     // Also save to cloud
     if (user) {
       saveScriptOfflineAware(script, isOnline, user.id);
@@ -82,13 +83,14 @@ export default function Dashboard() {
 
   const handleDelete = () => {
     if (!deleteId) return;
-    deleteScript(deleteId);
-    deleteScriptOfflineAware(deleteId, isOnline);
+    deleteScript(deleteId, user?.id);
+    deleteScriptOfflineAware(deleteId, isOnline, user?.id);
     setScripts(prev => prev.filter(s => s.id !== deleteId));
     setDeleteId(null);
   };
 
   const handleLogout = async () => {
+    clearUserData();
     await signOut();
     navigate('/');
   };
@@ -103,31 +105,36 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="flex items-center justify-between px-5 py-4 bg-card border-b">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold tracking-tight">ScriptCraft</h1>
-          <OnlineStatus />
-          {subscription.isPro && (
-            <span className="flex items-center gap-1 text-xs font-semibold bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">
-              <Crown className="w-3 h-3" /> PRO
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          {isOnline && getPendingSyncIds().length > 0 && (
-            <button
-              onClick={handleSync}
-              disabled={syncing}
-              className="text-muted-foreground hover:text-foreground active:scale-95 transition-all"
-              title="Sync pending changes"
-            >
-              <RefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
+      <header className="flex flex-col bg-card border-b">
+        <div className="flex items-center justify-between px-5 py-4">
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-bold tracking-tight">ScriptCraft</h1>
+            <OnlineStatus />
+            {subscription.isPro && (
+              <span className="flex items-center gap-1 text-xs font-semibold bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">
+                <Crown className="w-3 h-3" /> PRO
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {isOnline && user && getPendingSyncIds(user.id).length > 0 && (
+              <button
+                onClick={handleSync}
+                disabled={syncing}
+                className="text-muted-foreground hover:text-foreground active:scale-95 transition-all"
+                title="Sync pending changes"
+              >
+                <RefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
+              </button>
+            )}
+            <button onClick={handleLogout} className="text-muted-foreground hover:text-foreground active:scale-95 transition-all">
+              <LogOut className="w-5 h-5" />
             </button>
-          )}
-          <button onClick={handleLogout} className="text-muted-foreground hover:text-foreground active:scale-95 transition-all">
-            <LogOut className="w-5 h-5" />
-          </button>
+          </div>
         </div>
+        {user?.email && (
+          <p className="px-5 pb-3 text-xs text-muted-foreground truncate">Logged in as: {user.email}</p>
+        )}
       </header>
 
       <main className="max-w-2xl mx-auto px-5 py-8">

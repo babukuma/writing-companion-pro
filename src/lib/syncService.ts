@@ -1,34 +1,40 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Script } from './types';
 
-const PENDING_SYNC_KEY = 'scriptcraft_pending_sync';
-const SCRIPTS_KEY = 'scriptcraft_scripts';
+function getPendingSyncKey(userId: string) {
+  return `scriptcraft_pending_sync_${userId}`;
+}
 
-// Local storage helpers
-function getLocalScripts(): Script[] {
-  const data = localStorage.getItem(SCRIPTS_KEY);
+function getScriptsKey(userId: string) {
+  return `scriptcraft_scripts_${userId}`;
+}
+
+// Local storage helpers (user-scoped)
+function getLocalScripts(userId: string): Script[] {
+  const data = localStorage.getItem(getScriptsKey(userId));
   return data ? JSON.parse(data) : [];
 }
 
-function saveLocalScripts(scripts: Script[]) {
-  localStorage.setItem(SCRIPTS_KEY, JSON.stringify(scripts));
+function saveLocalScripts(scripts: Script[], userId: string) {
+  localStorage.setItem(getScriptsKey(userId), JSON.stringify(scripts));
 }
 
-function markPendingSync(scriptId: string) {
-  const pending = getPendingSyncIds();
+function markPendingSync(userId: string, scriptId: string) {
+  const pending = getPendingSyncIds(userId);
   if (!pending.includes(scriptId)) {
     pending.push(scriptId);
-    localStorage.setItem(PENDING_SYNC_KEY, JSON.stringify(pending));
+    localStorage.setItem(getPendingSyncKey(userId), JSON.stringify(pending));
   }
 }
 
-function removePendingSync(scriptId: string) {
-  const pending = getPendingSyncIds().filter(id => id !== scriptId);
-  localStorage.setItem(PENDING_SYNC_KEY, JSON.stringify(pending));
+function removePendingSync(userId: string, scriptId: string) {
+  const pending = getPendingSyncIds(userId).filter(id => id !== scriptId);
+  localStorage.setItem(getPendingSyncKey(userId), JSON.stringify(pending));
 }
 
-export function getPendingSyncIds(): string[] {
-  const data = localStorage.getItem(PENDING_SYNC_KEY);
+export function getPendingSyncIds(userId?: string): string[] {
+  if (!userId) return [];
+  const data = localStorage.getItem(getPendingSyncKey(userId));
   return data ? JSON.parse(data) : [];
 }
 
@@ -81,26 +87,28 @@ export async function deleteCloudScript(scriptId: string) {
 
 // Offline-aware operations
 export function saveScriptOfflineAware(script: Script, isOnline: boolean, userId?: string) {
-  // Always save locally
-  const scripts = getLocalScripts();
+  if (!userId) return;
+  // Always save locally under user's key
+  const scripts = getLocalScripts(userId);
   const idx = scripts.findIndex(s => s.id === script.id);
   if (idx >= 0) scripts[idx] = script;
   else scripts.unshift(script);
-  saveLocalScripts(scripts);
+  saveLocalScripts(scripts, userId);
 
-  if (isOnline && userId) {
+  if (isOnline) {
     saveCloudScript(userId, script).catch(() => {
-      markPendingSync(script.id);
+      markPendingSync(userId, script.id);
     });
   } else {
-    markPendingSync(script.id);
+    markPendingSync(userId, script.id);
   }
 }
 
-export function deleteScriptOfflineAware(scriptId: string, isOnline: boolean) {
-  const scripts = getLocalScripts().filter(s => s.id !== scriptId);
-  saveLocalScripts(scripts);
-  removePendingSync(scriptId);
+export function deleteScriptOfflineAware(scriptId: string, isOnline: boolean, userId?: string) {
+  if (!userId) return;
+  const scripts = getLocalScripts(userId).filter(s => s.id !== scriptId);
+  saveLocalScripts(scripts, userId);
+  removePendingSync(userId, scriptId);
 
   if (isOnline) {
     deleteCloudScript(scriptId).catch(() => {});
@@ -108,10 +116,10 @@ export function deleteScriptOfflineAware(scriptId: string, isOnline: boolean) {
 }
 
 export async function syncPendingScripts(userId: string): Promise<number> {
-  const pending = getPendingSyncIds();
+  const pending = getPendingSyncIds(userId);
   if (pending.length === 0) return 0;
 
-  const scripts = getLocalScripts();
+  const scripts = getLocalScripts(userId);
   let synced = 0;
 
   for (const id of pending) {
@@ -119,13 +127,13 @@ export async function syncPendingScripts(userId: string): Promise<number> {
     if (script) {
       try {
         await saveCloudScript(userId, script);
-        removePendingSync(id);
+        removePendingSync(userId, id);
         synced++;
       } catch {
         // Will retry next time
       }
     } else {
-      removePendingSync(id);
+      removePendingSync(userId, id);
     }
   }
 
@@ -133,7 +141,7 @@ export async function syncPendingScripts(userId: string): Promise<number> {
 }
 
 export async function mergeCloudAndLocal(userId: string): Promise<Script[]> {
-  const local = getLocalScripts();
+  const local = getLocalScripts(userId);
 
   try {
     const cloud = await fetchCloudScripts(userId);
@@ -146,7 +154,7 @@ export async function mergeCloudAndLocal(userId: string): Promise<Script[]> {
       const existing = merged.get(s.id);
       if (!existing || new Date(s.updatedAt) > new Date(existing.updatedAt)) {
         merged.set(s.id, s);
-        saveCloudScript(userId, s).catch(() => markPendingSync(s.id));
+        saveCloudScript(userId, s).catch(() => markPendingSync(userId, s.id));
       }
     }
 
@@ -154,7 +162,7 @@ export async function mergeCloudAndLocal(userId: string): Promise<Script[]> {
       (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );
 
-    saveLocalScripts(result);
+    saveLocalScripts(result, userId);
     return result;
   } catch {
     return local;

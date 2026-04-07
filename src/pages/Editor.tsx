@@ -46,7 +46,7 @@ export default function Editor() {
 
   useEffect(() => {
     if (!id) return;
-    const s = getScript(id);
+    const s = getScript(id, user?.id);
     if (!s) { navigate('/dashboard'); return; }
     setScript(s);
     if (s.elements.length > 0) setActiveType(s.elements[s.elements.length - 1].type);
@@ -57,7 +57,7 @@ export default function Editor() {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       updated.updatedAt = new Date().toISOString();
-      saveScript(updated);
+      saveScript(updated, user?.id);
       saveScriptOfflineAware(updated, isOnline, user?.id);
       setSaved(true);
     }, 800);
@@ -233,7 +233,7 @@ export default function Editor() {
     if (!script) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     script.updatedAt = new Date().toISOString();
-    saveScript(script);
+    saveScript(script, user?.id);
     setSaved(true);
   };
 

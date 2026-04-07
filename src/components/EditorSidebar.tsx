@@ -30,7 +30,7 @@ export default function EditorSidebar({ open, onOpenChange, script, onSave, onOp
 
   const handleNewProject = () => {
     if (!newTitle.trim()) return;
-    const s = createScript(newTitle.trim());
+    const s = createScript(newTitle.trim(), user?.id);
     saveScriptOfflineAware(s, isOnline, user?.id);
     setShowNewDialog(false);
     setNewTitle('');
