@@ -62,18 +62,35 @@ export default function Editor() {
     }, 800);
   }, [isOnline, user]);
 
+  const computePageCount = (elements: ScriptElement[]) =>
+    Math.max(1, Math.ceil(
+      elements.reduce((lines, el) => {
+        const contentLines = el.content ? Math.max(1, Math.ceil(el.content.length / 60)) : 1;
+        const spacing = el.type === 'scene-heading' ? 2 : 1;
+        return lines + contentLines + spacing;
+      }, 0) / 56
+    ));
+
   const updateElement = (elementId: string, content: string) => {
     if (!script) return;
-    const updated = {
-      ...script,
-      elements: script.elements.map(el => el.id === elementId ? { ...el, content } : el),
-    };
+    const newElements = script.elements.map(el => el.id === elementId ? { ...el, content } : el);
+    // Check if typing would exceed page limit
+    if (!subscription.isPro && computePageCount(newElements) > FREE_PAGE_LIMIT) {
+      setShowPaywall(true);
+      return; // Block the edit
+    }
+    const updated = { ...script, elements: newElements };
     setScript(updated);
     autoSave(updated);
   };
 
   const addElement = (type?: ScriptElementType) => {
     if (!script) return;
+    // Block adding elements if page limit reached
+    if (!subscription.isPro && computePageCount(script.elements) >= FREE_PAGE_LIMIT) {
+      setShowPaywall(true);
+      return;
+    }
     const t = type || activeType;
     const newEl: ScriptElement = { id: crypto.randomUUID(), type: t, content: '' };
     const updated = { ...script, elements: [...script.elements, newEl] };
