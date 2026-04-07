@@ -71,7 +71,7 @@ export default function Dashboard() {
       setShowPaywall(true);
       return;
     }
-    const script = createScript(newTitle.trim());
+    const script = createScript(newTitle.trim(), user?.id);
     // Also save to cloud
     if (user) {
       saveScriptOfflineAware(script, isOnline, user.id);
