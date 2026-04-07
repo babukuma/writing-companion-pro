@@ -116,6 +116,12 @@ export default function Editor() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, element: ScriptElement) => {
+    // Ctrl+T → insert transition element
+    if (e.key === 't' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      handleTypeClick('transition');
+      return;
+    }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       // Auto-advance type based on screenplay flow
